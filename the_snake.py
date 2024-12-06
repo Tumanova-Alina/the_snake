@@ -1,3 +1,7 @@
+"""Компьютерная игра 'Змейка'.
+
+Написана на языке Python
+"""
 from random import choice
 import pygame
 
@@ -62,8 +66,11 @@ class GameObject:
 class Apple(GameObject):
     """Класс, описывающий поведение яблока в коде."""
 
-    def __init__(self, color=APPLE_COLOR, occupied_cells=[]) -> None:
+    def __init__(self, color=APPLE_COLOR, occupied_cells=None) -> None:
         super().__init__(color)
+        """Инициализатор класса яблоко."""
+        if occupied_cells is None:
+            occupied_cells = []
         self.randomize_position(occupied_cells)
 
     def randomize_position(self, occupied_cells):
@@ -82,6 +89,7 @@ class Snake(GameObject):
 
     def __init__(self, color=SNAKE_COLOR):
         super().__init__(color)
+        """Инициализатор класса змейка."""
         self.body_color = SNAKE_COLOR
         self.length = 1
         self.positions = [start_pos]
@@ -120,7 +128,8 @@ class Snake(GameObject):
             pygame.draw.rect(screen, self.body_color, rect)
             pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
 
-        head_rect = pygame.Rect(self.positions[0], (GRID_SIZE, GRID_SIZE))
+        head_rect = (pygame.Rect(self.get_head_position(),
+                     (GRID_SIZE, GRID_SIZE)))
         pygame.draw.rect(screen, self.body_color, head_rect)
         pygame.draw.rect(screen, BORDER_COLOR, head_rect, 1)
 
@@ -136,7 +145,7 @@ class Snake(GameObject):
         """Функция, сбрасывающая текущее значение змейки."""
         self.length = 1
         self.positions = [start_pos]
-        self.direction = choice(UP, DOWN, RIGHT, LEFT)
+        self.direction = choice([UP, DOWN, RIGHT, LEFT])
         self.last = None
 
 
@@ -173,7 +182,7 @@ def main():
         clock.tick(SPEED)
 
         handle_keys(snake)
-        pygame.display.update()
+        snake.update_direction()
         snake.move()
         snake.update_direction()
 
@@ -182,14 +191,14 @@ def main():
             snake.length += 1
             apple.randomize_position(snake.positions)
 
-        elif snake.get_head_position() in snake.positions[1:]:
+        if snake.get_head_position() in snake.positions[1:]:
             snake.reset()
             apple.randomize_position(snake.positions)
             screen.fill(BOARD_BACKGROUND_COLOR)
-            pygame.display.update()
 
         apple.draw()
         snake.draw()
+        pygame.display.update()
         pygame.display.flip()
 
     pygame.quit()
